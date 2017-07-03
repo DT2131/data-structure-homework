@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int MAXN=100;
+typedef struct Node{
+    int x1,x2,y1,y2,step;
+}Node;
+int vis[MAXN][MAXN][MAXN][MAXN],fa[MAXN],n,m,k;
+queue <Node> que;
+void ini(){
+    memset(vis,-1,sizeof(vis));
+    memset(fa,-1,sizeof(fa));
+}
+void show(){
+
+}
+int solve(){
+    while(!que.empty()) que.pop();
+    int ppp=0;
+    que.push({n,m,0,0,0});
+    Node now,pos;
+    while(!que.empty()){
+        pos=que.front();
+        for(int i=0;i<=now.x2;i++){
+            for(int j=max(i,now.y2+i-now.y1);j<=now.x1;j++){
+                now.x1=pos.x1-j;now.x2=pos.x2-i;now.y1=pos.y1+j;now.y2=pos.y2+i;
+                if(vis[now.x1][now.x2][now.y1][now.y2]=-1){
+
+                }else{
+
+                }
+            }
+        }
+    }
+}
+int main()
+{
+    while(scanf("%d%d%d",&n,&m,&k)!=-1){
+        ini();
+        show(solve());
+    }
+}

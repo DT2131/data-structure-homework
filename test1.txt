@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef struct Node{
+    char name[20];
+    int status;
+    int val;
+    Node *next;
+}Node;
+typedef struct Queue{
+    Node *head;
+    Node *tail;
+    Queue(){
+        head=(Node *)malloc(sizeof(Node));
+        head->next=NULL;
+        tail=head;
+    }
+    int size=0;
+public:
+    bool empty(){
+        return head->next==NULL?1:0;
+    }
+    void pop(){
+        Node *p=head->next;
+        free(head);
+        head=p;
+        size--;
+    }
+    void push(Node a){
+        tail->next=(Node *)malloc(sizeof(Node));
+        strcpy(tail->next->name,a.name);
+        tail->next->status=a.status;
+        tail->next->val=a.val;
+        tail->next->next=NULL;
+        size++;
+        tail=tail->next;
+    }
+    Node front(){
+        return *head->next;
+    }
+    void traval(){
+        Node *a=head->next;
+        while(a!=NULL){
+            cout<<a->name<<endl;
+            a=a->next;
+        }
+    }
+}Queue;
+Queue que1,que2;
+int solve(int lim){
+    int has=0,status,ans=0;
+    Node now;
+    while(1){
+        ans+=que2.size;
+        if(lim==0){
+            status=-1;
+            break;
+        }
+        lim--;
+        if(que1.empty()) return 999999999;
+        now=que1.front();
+        que1.pop();
+        if(now.status==0){
+            if(now.val>has) que2.push(now);
+            else{
+                has-=now.val;
+            }
+        }else{
+            has+=now.val;
+            if(!que2.empty()){
+                int len=que2.size;
+                while(len--){
+                    if(que2.front().val<=has){
+                        has-=que2.front().val;
+                    }else{
+                        que2.push(que2.front());
+                    }
+                }
+                que2.pop();
+            }
+        }
+        cout<<"The status of queue1:"<<endl;
+        que1.traval();
+        cout<<"The status of queue2:"<<endl;
+        que2.traval();
+    }
+    return ans;
+}
+int main(){
+
+    cout<<"How many customers?"<<endl;
+    int T,lim;
+    cin>>T;
+    while(T--){
+        Node a;
+        a.next=NULL;
+        cout<<"Please enter the name"<<endl;
+        cin>>a.name;
+        cout<<"withdraw or deposit(0/1)"<<endl;
+        cin>>a.status;
+        cout<<"how much?"<<endl;
+        cin>>a.val;
+        que1.push(a);
+    }
+    cout<<"Please enter the banking hours"<<endl;
+    cin>>lim;
+    cout<<"dealing......."<<endl;
+    cout<<(double)solve(lim)/lim<<endl;
+}
+/*
+5
+DT1
+0
+20
+DT2
+0
+80
+DT3
+1
+50
+DT4
+0
+10
+DT5
+1
+80
+5
+*/
