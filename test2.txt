@@ -13,7 +13,7 @@ public:
         elem[++tail]=str;
     }
     Type front(){
-        return elem[++head];
+        return elem[head+1];
     }
     bool empty(){
         return head==tail?1:0;
@@ -35,7 +35,7 @@ public:
         elem[++head]=str;
     }
     bool empty(){
-        return head==-1?:0;
+        return head==-1?1:0;
     }
     Type top(){
         return elem[head];
@@ -50,17 +50,17 @@ public:
         head=-1;
     }
 };
-
-Queue <string> sque;
+int priority[129];
+Queue <char> sque;
 Queue <double> dque;
-Stack <string> ssta;
+Stack <char> ssta;
 Stack <double> dsta;
-int pri[128]={0};
+bool innum;bool cut;
+double num;int cnt,cnnt;
+bool order[MAXN];
 void divide(string str){
     str+="@";
     int len=str.size();
-    bool innum=0;bool cut=0;
-    double num=0;int cnt=1;
     for(int i=0;i<len;i++){
         if(str[i]<='9'&&str[i]>='0'){
             innum=1;
@@ -70,30 +70,97 @@ void divide(string str){
         }else if(str[i]=='.'){
             cut=1;
         }else{
-            if(innum){dque.push(num/cnt);innum=0;cnt=1;cut=0;num=0;}
-            string temp;
+            if(innum){dque.push(num/cnt);innum=0;cnt=1;cut=0;num=0;order[++cnnt]=0;}
+            char temp;
             if(str[i]=='+'||str[i]=='-'||str[i]=='/'||str[i]=='*'||str[i]=='('||str[i]==')'||str[i]=='^'||str[i]=='@'){
                 temp=str[i];
             }else if(str[i]=='l'){
-                temp="ln";
+                temp='l';
                 i++;
             }else if(str[i]=='s'){
-                temp="sqrt";
+                temp='s';
                 i+=3;
             }
             sque.push(temp);
+            order[++cnnt]=1;
         }
     }
+    //dque.traval();
+    //sque.traval();
 }
-int main(){
-    string str;
+void ini(){
     dque.clear();
     dsta.clear();
     sque.clear();
     ssta.clear();
-    cin>>str;
-    divide(str);
-    dque.traval();
-    sque.traval();
+    memset(order,0,sizeof(order));
+    priority['@']=-1;
+    priority['(']=priority[')']=0;
+    priority['+']=priority['-']=1;
+    priority['*']=priority['/']=2;
+    priority['^']=3;
+    priority['s']=priority['l']=4;
+    innum=0;cut=0;
+    num=0;cnt=1;cnnt=-1;
+}
+void cal(){
+    char x=ssta.top();
+    ssta.pop();
+    if(x=='s'||x=='l'){
+        double x1=dsta.top();
+        dsta.pop();
+        if(x=='s')
+            dsta.push(sqrt(x1));
+        else dsta.push(log(x1));
+    }else{
+        double x2=dsta.top();
+        dsta.pop();
+        double x1=dsta.top();
+        dsta.pop();
+        if(x=='+'){
+            dsta.push(x1+x2);
+        }else if(x=='-'){
+            dsta.push(x1+x2);
+        }else if(x=='*'){
+            dsta.push(x1*x2);
+        }else if(x=='/'){
+            dsta.push(x1/x2);
+        }else if(x=='^'){
+            dsta.push(pow(x1,x2));
+        }
+    }
+}
+
+int main(){
+    while(1){
+        ini();
+        string str;
+        cin>>str;
+        divide(str);
+        int ppp;
+        for(int i=0;i<=cnnt;i++){
+            if(!order[i]){
+                dsta.push(dque.front());
+                dque.pop();
+            }else{
+                char now=sque.front();
+                sque.pop();
+                if(now=='@')
+                    ppp++;
+                while(!ssta.empty()&&now!='('){
+                    char pos=ssta.top();
+                    if(pos=='('&&now==')'){
+                        ssta.pop();
+                        break;
+                    }
+                    if(priority[pos]>=priority[now]) cal();
+                    else
+                        break;
+                }
+                if(now!=')') ssta.push(now);
+            }
+        }
+        cout<<dsta.top()<<endl;
+    }
 }
 
