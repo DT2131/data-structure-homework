@@ -1,0 +1,198 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int MAXN=1e7+10;
+typedef struct Node{
+    int x1,x2;bool dir;
+    bool operator < (const Node &a)const{
+        if(x1==a.x1){
+            if(x2==a.x2){
+                return dir<a.dir;
+            }else return x2<a.x2;
+        }else return x1<a.x1;
+    }
+}Node;
+int n,k,tot;
+map <Node,int> mp;
+Node nodes[MAXN];
+int fa[MAXN],dep[MAXN];
+vector <int> edge[MAXN];
+int vis[MAXN];
+int sta[MAXN],head;
+bool output_control;
+void ini(){
+    memset(dep,0,sizeof(dep));memset(fa,-1,sizeof(fa));memset(vis,0,sizeof(vis));
+    mp.clear();for(int i=0;i<=tot;i++) edge[i].clear();
+    tot=0;head=-1;
+}
+void build(){
+    int lim1,lim2;
+    queue <Node> que;Node now={n,n,0},pos;
+    que.push(now);
+    nodes[++tot]=now;
+    mp[now]=tot;
+    fa[tot]=-1;
+    bool lim_control=0;
+    while(!que.empty()){
+        now=que.front();que.pop();
+        int x=mp[now],y;
+        lim1=now.x1-now.x2;
+        lim2=(n-now.x1)-(n-now.x2);
+        if(now.dir){
+            pos.dir=0;
+            if(now.x2!=n) lim_control=1;
+            else lim_control=0;
+            for(int j=1;j<=n-now.x2&&j<=k;j++){//i==0
+                if(lim_control&&j>lim1) break;
+                pos.x1=now.x1;pos.x2=now.x2+j;
+                if(mp[pos]==0){
+                    mp[pos]=++tot;
+                    nodes[tot]=pos;
+                    if(pos.x1!=0||pos.x2!=0) que.push(pos);
+                }
+                y=mp[pos];
+                edge[x].push_back(y);
+            }
+            for(int i=1;i<=n-now.x1&&i<=k;i++){//i!=0
+                for(int j=i-lim2;j<=i&&j<=n-now.x2&&(i+j)<=k&&(j-i)<=lim1;j++){
+                    pos.x1=now.x1+i;pos.x2=now.x2+j;
+                    if(mp[pos]==0){
+                        mp[pos]=++tot;
+                        nodes[tot]=pos;
+                        if(pos.x1!=0||pos.x2!=0) que.push(pos);
+                    }
+                    y=mp[pos];
+                    edge[x].push_back(y);
+                }
+            }
+        }else{
+            pos.dir=1;
+            if(now.x1!=n) lim_control=1;
+            else lim_control=0;
+            for(int j=1;j<=now.x2&&j<=k;j++){//i==0
+                if(lim_control&&j>lim2) break;
+                pos.x1=now.x1;pos.x2=now.x2-j;
+                if(mp[pos]==0){
+                    mp[pos]=++tot;
+                    nodes[tot]=pos;
+                    if(pos.x1!=0||pos.x2!=0) que.push(pos);
+                }
+                y=mp[pos];
+                edge[x].push_back(y);
+            }
+            for(int i=1;i<=now.x1&&i<=k;i++){//i!=0
+                for(int j=i-lim1;j<=i&&j<=now.x2&&(i+j)<=k&&(j-i)<=lim2;j++){
+                    pos.x1=now.x1-i;pos.x2=now.x2-j;
+                    if(mp[pos]==0){
+                        mp[pos]=++tot;
+                        nodes[tot]=pos;
+                        if(pos.x1!=0||pos.x2!=0) que.push(pos);
+                    }
+                    y=mp[pos];
+                    edge[x].push_back(y);
+                }
+            }
+        }
+    }
+}
+void show_way(int x){
+    if(x==-1) return ;
+    show_way(fa[x]);
+    cout<<"Node:  "<<x<<"  position1:  "<<nodes[x].x1<<"  "<<nodes[x].x2<<"  position2:  "<<n-nodes[x].x1<<"  "<<n-nodes[x].x2<<"  direction:  "<<nodes[x].dir<<endl;
+}
+void solve(){
+    int now,pos,len,lim=tot+1;
+    queue <int> que;
+    que.push(1);
+    dep[1]=1;
+    while(!que.empty()){
+        now=que.front();
+        que.pop();
+        len=edge[now].size();
+        for(int i=0;i<len;i++){
+            pos=edge[now][i];
+            if(!dep[pos]){
+                dep[pos]=dep[now]+1;
+                fa[pos]=now;
+                if(edge[pos].empty()){
+                    cout<<"We need at least "<<dep[pos]-1<<" steps to solve the problem."<<endl;
+                    show_way(pos);
+                    cout<<endl;
+                    return ;
+                }
+                else que.push(pos);
+            }
+        }
+    }
+    if(lim==tot+1) puts("Sorry, no answer");
+}
+void show_path(){
+    cout<<"feasible path: "<<endl;
+    for(int i=0;i<=head;i++)
+        cout<<"Node:  "<<sta[i]<<"  position1:  "<<nodes[sta[i]].x1<<"  "<<nodes[sta[i]].x2<<"  position2:  "<<n-nodes[sta[i]].x1<<"  "<<n-nodes[sta[i]].x2<<"  direction:  "<<nodes[sta[i]].dir<<endl;
+    cout<<endl;
+}
+int dfs(int now,int left){
+    vis[now]=1;
+    sta[++head]=now;
+    int len=edge[now].size(),pos;
+    int ans=0;
+    if(len==0){
+        if(!output_control) show_path();
+        ans++;
+    }else{
+        if(left>0){
+            for(int i=0;i<len;i++){
+                pos=edge[now][i];
+                if(!vis[pos])
+                ans+=dfs(pos,left-1);
+            }
+        }
+    }
+    vis[now]=0;
+    head--;
+    return ans;
+}
+void search_all(){
+    cout<<"Please enter the step limit: ";
+    int p;cin>>p;cout<<endl;
+    cout<<"Print all the path?(Y/N): ";
+    char t;cin>>t;
+    output_control=(t=='Y')?0:1;
+    cout<<"There are total "<<dfs(1,p)<<" answer(s) with the step limit of "<<p<<"."<<endl;
+}
+void debug(){
+    cout<<"tot: "<<tot<<endl;
+    for(int i=1;i<=tot;i++)
+        cout<<i<<": "<<nodes[i].x1<<' '<<nodes[i].x2<<' '<<nodes[i].dir<<endl;
+    for(int i=1;i<=tot;i++){
+        cout<<i<<": ";
+        for(int j=0;j<edge[i].size();j++)
+            cout<<edge[i][j]<<' ';
+        cout<<endl;
+    }
+}
+int main(){
+   while(1){
+        system("cls");
+        cout<<"please enter the number of monk(s) or barbarian(s) and load limit of ship ( please separate them by space ):  ";
+        cin>>n>>k;
+        cout<<endl;
+        build();
+        while(1){
+            cout<<"1.Find the shortest path"<<endl;
+            cout<<"2.Find the all the path with step limit x"<<endl;
+            cout<<"3.Change the input"<<endl;
+            cout<<"4.Developer Mode"<<endl;
+            cout<<"Please enter 1 2 3 or 4 to continue: ";
+            int p;
+            cin>>p;
+            if(p==1) solve();
+            else if(p==2) search_all();
+            else if(p==4) debug();
+            else break;
+            system("pause");
+        }
+        ini();
+    }
+}
