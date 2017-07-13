@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define size(_) ((_)==NULL?0:(_)->size)
+#define height(_) ((_)==NULL?-1:(_)->height)
+const int MAXN=5e5;
+typedef struct AVL{
+	int size,height,val,key;
+	AVL *ch[2];
+}AVL,*Node;
+
+AVL nodes[MAXN];
+int tot;
+void Maintain(Node *now,int dir){
+    if(height((*now)))
+}
+void update(Node now){
+	if(now==NULL) return ;
+	now->size=size(now->ch[0])+size(now->ch[1])+1;
+	now->height=max(height(now->ch[0]),height(now->ch[1]))+1;
+}
+void Insert(Node* now,int key,int value){
+	if(*now==NULL){
+		*now=&nodes[++tot];
+		(*now)->ch[0]=(*now)->ch[1]=NULL;
+		(*now)->key=key,(*now)->height=0,(*now)->size=1,(*now)->val=value;
+	}else{
+		int dir=key>(*now)->key;
+		Insert(&((*now)->ch[dir]),key,value);
+		update(*now);
+		Maintain(now,dir);
+	}
+}
+int main(){
+	while(1){
+		tot=-1;
+		Node root=NULL;
+		while(1){
+			cout<<"1.Insert a Node"<<endl;
+			cout<<"2.Delete a Node"<<endl;
+			cout<<"3.Search a Node"<<endl;
+			cout<<"4.Rebuild the AVL tree"<<endl;
+			cout<<"Please enter 1 2 3 or 4 to continue: "<<endl;
+			int t,x,y;
+			cin>>t;
+			if(t==1){
+				cout<<"Please enter the key and value of new Node: "<<endl;
+				cin>>x>>y;
+				Insert(&root,x,y);
+			}else if(t==2){
+
+			}else if(t==3){
+
+			}else if(t==4){
+				break;
+			}
+		}
+	}
+
+}

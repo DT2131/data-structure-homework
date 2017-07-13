@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int MAXN=14;
+const int mod=13;
+typedef struct Node{
+    int elem=-1;
+    Node *next=NULL;
+}Node,*node;
+Node nodes[MAXN];
+void Insert(int x){
+    int pos=x%mod;
+    node p,q;
+    q=&nodes[pos];
+    p=NULL;
+    while(q!=NULL){
+        p=q;
+        q=q->next;
+    }
+    q=(Node *)malloc(sizeof(Node));
+    q->elem=x;
+    q->next=NULL;
+    if(p!=NULL) p->next=q;
+}
+void Delete(int x){
+    int pos=x%mod;
+    node p,q;
+    q=&nodes[pos];
+    p=NULL;
+    while(q!=NULL&&q->elem!=x){
+        p=q;
+        q=q->next;
+    }
+    if(q!=NULL){
+        p->next=q->next;
+        free(q);
+    }
+}
+int Find(int x){
+    int pos=x%mod;
+    int cnt=-1;
+    node q;
+    q=&nodes[pos];
+    while(q!=NULL&&q->elem!=x){
+        q=q->next;
+        cnt++;
+    }
+    return q==NULL||q->elem!=x?-1:cnt;
+}
+int main()
+{
+    while(1){
+        cout<<"1.Insert an int"<<endl;
+        cout<<"2.Delete an int"<<endl;
+        cout<<"3.Find an int"<<endl;
+        cout<<"Please enter 1 2 or 3 to continue: ";
+        int p;
+        cin>>p;
+        cout<<"Please enter the number: ";
+        int x;cin>>x;
+        if(p==1){
+            Insert(x);
+        }else if(p==2){
+            Delete(x);
+        }else{
+            int ans=Find(x);
+            if(ans!=-1){
+                cout<<"Success, position "<<ans<<endl;
+            }else{
+                cout<<"NOT FOUND"<<endl;
+            }
+        }
+    }
+}
