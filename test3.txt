@@ -1,0 +1,259 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define Max_N 200000
+#define _max(a,b) ((a)>(b)?(a):(b))
+#define Height(_) ((_)==NULL ? -1 : (_)->Height)
+typedef struct _avl{
+    int val, key, size, Height;
+    struct _avl *ch[2];
+}AvlTree, *Avl;
+AvlTree istack[Max_N];
+int sz = 0;
+void update(Avl *x){
+    if ((*x) == NULL) return;
+    (*x)->Height = _max(Height((*x)->ch[0]), Height((*x)->ch[1])) + 1;
+}
+void rotate(Avl *x, int d){
+    Avl k = (*x)->ch[!d];
+    (*x)->ch[!d] = k->ch[d];
+    k->ch[d] = *x;
+    update(x);
+    update(&k);
+    *x = k;
+}
+void Maintain(Avl *x, int d){
+    if (Height((*x)->ch[d]) - Height((*x)->ch[!d]) == 2){
+        if (Height((*x)->ch[d]->ch[d]) - Height((*x)->ch[d]->ch[!d]) == 1) rotate(x, !d);
+        else if (Height((*x)->ch[d]->ch[d]) - Height((*x)->ch[d]->ch[!d]) == -1){
+            rotate(&((*x)->ch[d]), d), rotate(x, !d);
+        }
+    }
+}
+void insert(Avl *x, int val, int key){
+    if (*x == NULL){
+        *x = &istack[sz++];
+        (*x)->ch[0] = (*x)->ch[1] = NULL;
+        (*x)->key = key, (*x)->Height = 0, (*x)->size = 1, (*x)->val = val;
+    } else {
+        int d = key > (*x)->key;
+        insert(&((*x)->ch[d]), val, key);
+        update(x);
+        Maintain(x, d);
+    }
+}
+void _delete(Avl *x, int key){
+    if (*x == NULL) return;
+    if ((*x)->key == key){
+        if (!(*x)->ch[0] || !(*x)->ch[1]){
+            *x = (*x)->ch[0] ? (*x)->ch[0] : (*x)->ch[1];
+        } else {
+            Avl ret = (*x)->ch[1];
+            for (; ret->ch[0] != NULL; ret = ret->ch[0]);
+            _delete(&((*x)->ch[1]), (*x)->key = ret->key);
+        }
+    } else {
+        _delete(&((*x)->ch[key > (*x)->key]), key);
+    }
+    if (*x != NULL){
+        update(x);
+        Maintain(x, 0), Maintain(x, 1);
+    }
+}
+int find(Avl x, int k){
+    if(x==NULL) return -1;
+    if(x->key!=k){
+        int d=k>x->key;
+        int p=find(x->ch[d],k);
+        return p==-1?-1:1+p;
+    }
+    return 1;
+}
+typedef struct Node{
+    Node *ls,*rs;
+    int val;
+}Node;
+typedef struct BSTree{
+    Node *root;
+    BSTree(){root=NULL;}
+public:
+    Node* newnode(){
+        Node *p=(Node*)malloc(sizeof(Node));
+        p->ls=p->rs=NULL;
+        return p;
+    }
+    string Search(int x,Node *a){
+        if(a->val==x){
+            return " ";
+        }
+        if(a->val>x) return "0"+Search(x,a->ls);
+        return "1"+Search(x,a->rs);
+    }
+    Node* Insert(int x,Node *a){
+        if(a==NULL){
+            a=newnode();
+            a->val=x;
+        }else if(a->val>x){
+            a->ls=Insert(x,a->ls);
+        }else{
+            a->rs=Insert(x,a->rs);
+        }
+        return a;
+    }
+    Node* Delete_Search(int x,Node *a){
+        if(((a->ls!=NULL)&&(a->ls->val==x))||((a->rs!=NULL)&&(a->rs->val==x))) return a;
+        if(a->val>x) return Delete_Search(x,a->ls);
+        return Delete_Search(x,a->rs);
+    }
+    void Delete(int x){
+        Node *rt=NULL,*p=NULL,*fa=NULL,*re=NULL;
+        if(root->val==x){
+            if(root->ls==NULL&&root->rs==NULL){
+                free(root);root=NULL;return ;
+            }else{
+                re=root;
+            }
+        }else{
+            rt=Delete_Search(x,root);
+            if(rt->val>x){
+                re=rt->ls;
+                if(re->ls==NULL&&re->rs==NULL){free(re);rt->ls=NULL;return ;}
+            }else{
+                re=rt->rs;
+                if(re->ls==NULL&&re->rs==NULL){free(re);rt->rs=NULL;return ;}
+            }
+        }
+        if(re->ls!=NULL){
+            p=re->ls;
+            fa=re;
+            if(p->rs==NULL){
+                fa->ls=p->ls;
+                re->val=p->val;
+            }else{
+                while(p->rs!=NULL){fa=p;p=p->rs;}
+                fa->rs=p->ls;
+                re->val=p->val;
+            }
+            free(p);
+        }else{
+            p=re->rs;
+            fa=re;
+            if(p->ls==NULL){
+                fa->rs=p->rs;
+                re->val=p->val;
+            }else{
+                while(p->ls!=NULL){fa=p;p=p->ls;}
+                fa->ls=p->rs;
+                re->val=p->val;
+            }
+            free(p);
+        }
+        return ;
+    }
+    void build(int a[],int n){
+        for(int i=0;i<n;i++)
+            root=Insert(a[i],root);
+    }
+    void show(Node *a){
+        if(a==NULL) return ;
+        show(a->ls);
+        cout<<a->val<<' ';
+        show(a->rs);
+    }
+}BSTree;
+int inii[13]={1,4,6,8,2,3,14,7,5,17,15,19,11};
+int main(){
+    while(1){
+        cout<<"1.Build a BST"<<endl;
+        cout<<"2.Build an AVL Tree"<<endl;
+        cout<<"3.Please enter 1 or 2 to continue: "<<endl;
+        int chi,x,y;
+        cin>>chi;
+        if(chi==2){
+            Avl root = NULL;
+            set <int> in;
+            while(1){
+                cout<<"1.Insert a Node"<<endl;
+                cout<<"2.Delete a Node"<<endl;
+                cout<<"3.Find a Node"<<endl;
+                cout<<"4.Ini"<<endl;
+                cout<<"5.Calculate the ASL"<<endl;
+                cout<<"6.Back"<<endl;
+                cout<<"Please enter 1 2 3 4 5 or 6 to continue: ";
+                cin>>chi;
+                if(chi==1){
+                    cout<<"Please enter the value and the key of Node: ";
+                    cin>>x>>y;
+                    in.insert(y);
+                    insert(&root,x,y);
+                }else if(chi==2){
+                    cout<<"Please enter the key of Node: ";
+                    cin>>x>>y;
+                    _delete(&root,x);
+                    in.erase(y);
+                }else if(chi==3){
+                    cout<<"Please enter the key of Node: ";
+                    cin>>x;
+                    chi=find(root,x);
+                    if(chi==-1){
+                        cout<<"NOT FOUND"<<endl;
+                    }else{
+                        cout<<chi<<" steps to find the Node"<<endl;
+                    }
+                }else if(chi==4){
+                    for(int i=0;i<13;i++){
+                        in.insert(inii[i]);
+                        insert(&root,inii[i],inii[i]);
+                    }
+                }else if(chi==5){
+                    double ans=0;
+                    for(set<int>::iterator itt=in.begin();itt!=in.end();itt++){
+                        cout<<*itt<<endl;
+                        ans+=find(root,*itt);
+                    }
+                    cout<<"ASL : "<<ans/in.size()<<endl;
+                }else break;
+            }
+        }else{
+            BSTree b;
+            set <int> in;
+            while(1){
+                cout<<"1.Ini"<<endl;
+                cout<<"2.Insert a Node"<<endl;
+                cout<<"3.Delete a Node"<<endl;
+                cout<<"4.Find a Node"<<endl;
+                cout<<"5.Calculate the ASL"<<endl;
+                cout<<"6.Back"<<endl;
+                b.show(b.root);cout<<endl;
+                cout<<"Please enter 1 2 3 4 5 or 6 to continue: ";
+                cin>>chi;
+                if(chi==1){
+                    b.build(inii,13);
+                    for(int i=0;i<13;i++) in.insert(inii[i]);
+                }else if(chi==2){
+                    cout<<"Please enter the value of Node: ";
+                    cin>>x;
+                    in.insert(x);
+                    b.Insert(x,b.root);
+                }else if(chi==3){
+                    cout<<"Please enter the value of Node: ";
+                    cin>>x;
+                    in.erase(x);
+                    b.Delete(x);
+                }else if(chi==4){
+                    cout<<"Please enter the value of Node: ";
+                    cin>>x;
+                    cout<<"Path: "<<b.Search(x,b.root)<<endl;
+                }else if(chi==5){
+                    double ans=0;
+                    for(set<int>::iterator itt=in.begin();itt!=in.end();itt++){
+                        string temp=b.Search(*itt,b.root);
+                        ans+=temp.size();
+                    }
+                    cout<<"ASL : "<<ans/in.size()<<endl;
+                }else break;
+
+            }
+        }
+    }
+    return 0;
+}
