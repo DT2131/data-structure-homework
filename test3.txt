@@ -197,7 +197,7 @@ int main(){
                     cout<<"Please enter the key of Node: ";
                     cin>>x;
                     _delete(&root,x);
-                    in.erase(y);
+                    in.erase(x);
                 }else if(chi==3){
                     cout<<"Please enter the key of Node: ";
                     cin>>x;

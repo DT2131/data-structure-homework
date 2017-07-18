@@ -52,6 +52,7 @@ int main()
         cout<<"1.Insert an int"<<endl;
         cout<<"2.Delete an int"<<endl;
         cout<<"3.Find an int"<<endl;
+        cout<<"MOD="<<mod<<endl;
         cout<<"Please enter 1 2 or 3 to continue: ";
         int p;
         cin>>p;
