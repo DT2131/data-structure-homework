@@ -82,11 +82,17 @@ public:
         return p;
     }
     string Search(int x,Node *a){
+        if(a==NULL) return "NOT FOUND";
         if(a->val==x){
             return " ";
         }
-        if(a->val>x) return "0"+Search(x,a->ls);
-        return "1"+Search(x,a->rs);
+        string temp;
+        if(a->val>x){
+            temp=Search(x,a->ls);
+            return temp[0]=='N'?temp:'0'+temp;
+        }
+        temp=Search(x,a->rs);
+        return temp[0]=='N'?temp:'1'+temp;
     }
     Node* Insert(int x,Node *a){
         if(a==NULL){
@@ -106,46 +112,48 @@ public:
     }
     void Delete(int x){
         Node *rt=NULL,*p=NULL,*fa=NULL,*re=NULL;
-        if(root->val==x){
-            if(root->ls==NULL&&root->rs==NULL){
-                free(root);root=NULL;return ;
+        if(Search(x,root)!="NOT FOUND"){
+            if(root->val==x){
+                if(root->ls==NULL&&root->rs==NULL){
+                    free(root);root=NULL;return ;
+                }else{
+                    re=root;
+                }
             }else{
-                re=root;
+                rt=Delete_Search(x,root);
+                if(rt->val>x){
+                    re=rt->ls;
+                    if(re->ls==NULL&&re->rs==NULL){free(re);rt->ls=NULL;return ;}
+                }else{
+                    re=rt->rs;
+                    if(re->ls==NULL&&re->rs==NULL){free(re);rt->rs=NULL;return ;}
+                }
             }
-        }else{
-            rt=Delete_Search(x,root);
-            if(rt->val>x){
-                re=rt->ls;
-                if(re->ls==NULL&&re->rs==NULL){free(re);rt->ls=NULL;return ;}
+            if(re->ls!=NULL){
+                p=re->ls;
+                fa=re;
+                if(p->rs==NULL){
+                    fa->ls=p->ls;
+                    re->val=p->val;
+                }else{
+                    while(p->rs!=NULL){fa=p;p=p->rs;}
+                    fa->rs=p->ls;
+                    re->val=p->val;
+                }
+                free(p);
             }else{
-                re=rt->rs;
-                if(re->ls==NULL&&re->rs==NULL){free(re);rt->rs=NULL;return ;}
+                p=re->rs;
+                fa=re;
+                if(p->ls==NULL){
+                    fa->rs=p->rs;
+                    re->val=p->val;
+                }else{
+                    while(p->ls!=NULL){fa=p;p=p->ls;}
+                    fa->ls=p->rs;
+                    re->val=p->val;
+                }
+                free(p);
             }
-        }
-        if(re->ls!=NULL){
-            p=re->ls;
-            fa=re;
-            if(p->rs==NULL){
-                fa->ls=p->ls;
-                re->val=p->val;
-            }else{
-                while(p->rs!=NULL){fa=p;p=p->rs;}
-                fa->rs=p->ls;
-                re->val=p->val;
-            }
-            free(p);
-        }else{
-            p=re->rs;
-            fa=re;
-            if(p->ls==NULL){
-                fa->rs=p->rs;
-                re->val=p->val;
-            }else{
-                while(p->ls!=NULL){fa=p;p=p->ls;}
-                fa->ls=p->rs;
-                re->val=p->val;
-            }
-            free(p);
         }
         return ;
     }
@@ -187,7 +195,7 @@ int main(){
                     insert(&root,x,y);
                 }else if(chi==2){
                     cout<<"Please enter the key of Node: ";
-                    cin>>x>>y;
+                    cin>>x;
                     _delete(&root,x);
                     in.erase(y);
                 }else if(chi==3){
